@@ -51,10 +51,15 @@ jobs:
         uses: actions/cache@v6
         with:
           path: build
+          # Keyed on CMakeLists.txt/mod.json.template/geobuild.py so that changing SDK
+          # version, GD version, or dependency pins (all resolved into CACHE INTERNAL
+          # CMake variables that silently stick once set) invalidates the cache instead
+          # of restoring a build/ directory configured for a different target - that
+          # caused a real GD-version mismatch failure in practice. Deliberately no
+          # broader restore-keys fallback.
           key: build-${{ matrix.config.name }}-${{ hashFiles('CMakeLists.txt', 'mod.json.template', 'geobuild.py', 'cmake/**') }}-${{ github.sha }}
           restore-keys: |
             build-${{ matrix.config.name }}-${{ hashFiles('CMakeLists.txt', 'mod.json.template', 'geobuild.py', 'cmake/**') }}-
-            build-${{ matrix.config.name }}-
 
       - name: Build the mod
         uses: geode-sdk/build-geode-mod@main
