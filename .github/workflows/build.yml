@@ -74,6 +74,13 @@ jobs:
           # branch but hasn't been tagged in a release yet, so build against
           # 'nightly' to actually target 2.2091.
           sdk: 'nightly'
+          # Pin to our fork+commit adding two Windows addresses
+          # (LevelInfoLayer::create, AppDelegate::platformShutdown) that are missing
+          # from upstream geode-sdk/bindings' 2.2091 entry as of this commit -
+          # confirmed via the official Geode binding docs. Worth re-checking
+          # upstream periodically and dropping this once it lands there.
+          bindings: 'coolgameriguess/bindings'
+          bindings-ref: '07b06b9b00eb6c8c70dcf6dc26de148fdf25428f'
           build-config: ${{ matrix.config.build-config || 'Release' }}
           configure-args: '-DGLOBED_RELEASE=ON'
           export-pdb: true
