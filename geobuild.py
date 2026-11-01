@@ -21,11 +21,8 @@ import os
 # minimum required geode, can be a commit or a tag
 REQUIRED_GEODE_VERSION = "v5.10.0"
 XTLS_VERSION = "e29f88a"
-# Fork of dankmeme01/qunet-cpp@0eb6bcd with one extra fix: its "update api for new
-# asp::fs" commit left saveQdb() returning asp::fs::Error instead of std::string,
-# which doesn't build against the asp2 release used for GD 2.2091.
-QUNET_REPO = "coolgameriguess/qunet-cpp"
-QUNET_VERSION = "5ef11c5"
+QUNET_REPO = "dankmeme01/qunet-cpp"
+QUNET_VERSION = "fc19fbe"
 SERVER_SHARED_VERSION = "00359d3"
 CUE_VERSION = "e80ac94"
 
