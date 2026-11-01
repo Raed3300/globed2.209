@@ -23,7 +23,9 @@ endif()
 # these have to come early, cant be in geobuild
 set(ARC_FEATURE_NET ON CACHE BOOL "" FORCE)
 set(GEODE_CODEGEN_EXTRA_ARGS "--skip-pugixml" CACHE STRING "" FORCE)
-set(GEODE_ASP_VERSION "#a2ddce1" CACHE STRING "" FORCE)
+# NOTE: was previously pinned to an old asp2 commit (#a2ddce1) for the 2.2081/v5.11.2
+# SDK. That commit predates asp/fs/Path.hpp, which the nightly Geode SDK (targeting
+# GD 2.2091) requires, so let Geode's own default (asp2@1.5.3) apply instead.
 set(GEODE_NO_PUGIXML_HEADER ON CACHE BOOL "" FORCE)
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
