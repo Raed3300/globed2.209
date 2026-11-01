@@ -21,8 +21,17 @@ import os
 # minimum required geode, can be a commit or a tag
 REQUIRED_GEODE_VERSION = "v5.10.0"
 XTLS_VERSION = "e29f88a"
-QUNET_REPO = "dankmeme01/qunet-cpp"
-QUNET_VERSION = "fc19fbe"
+# Forks below carry fixes needed to build against GD 2.2091 / nightly Geode, which
+# aren't merged upstream yet:
+# - qunet-cpp: dankmeme01/qunet-cpp@0eb6bcd's "update api for new asp::fs" fix left
+#   saveQdb() returning asp::fs::Error instead of std::string.
+# - argon: GlobedGD/argon@v1.5.1 static_assert-fails for any GD version without a
+#   hardcoded g_urlOffset entry (none exist for 2.2091), and separately calls the
+#   removed asp::fs::isFile() free function.
+QUNET_REPO = "coolgameriguess/qunet-cpp"
+QUNET_VERSION = "5ef11c5"
+ARGON_REPO = "coolgameriguess/argon"
+ARGON_VERSION = "8e03432"
 SERVER_SHARED_VERSION = "00359d3"
 CUE_VERSION = "e80ac94"
 
@@ -458,7 +467,7 @@ def main(build: Build):
     build.add_cpm_dep("zeux/pugixml", "v1.16", link_name="pugixml-static", options = {
         "PUGIXML_NO_EXCEPTIONS": "ON",
     })
-    build.add_cpm_dep("GlobedGD/argon", "v1.5.1")
+    build.add_cpm_dep(ARGON_REPO, ARGON_VERSION)
     build.add_cpm_dep("Prevter/sinaps", "b9c3434")
     build.add_cpm_dep("stephenberry/glaze", "v8.0.0", link_name="glaze::glaze")
 
