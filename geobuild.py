@@ -21,7 +21,7 @@ import os
 # minimum required geode, can be a commit or a tag
 REQUIRED_GEODE_VERSION = "v5.10.0"
 XTLS_VERSION = "e29f88a"
-QUNET_VERSION = "fc19fbe"
+QUNET_VERSION = "0eb6bcd"  # bumped: fc19fbe predates qunet-cpp's "update api for new asp::fs" fix
 SERVER_SHARED_VERSION = "00359d3"
 CUE_VERSION = "e80ac94"
 

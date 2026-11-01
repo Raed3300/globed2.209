@@ -43,6 +43,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      # The build-geode-mod action already caches CPM sources and compiler
+      # output (sccache), but neither covers the CMake/Ninja build directory
+      # itself (incremental configure state + linking). Caching it too lets
+      # unrelated-file pushes relink/reconfigure instead of starting cold.
+      - name: Restore build directory cache
+        uses: actions/cache@v6
+        with:
+          path: build
+          key: build-${{ matrix.config.name }}-${{ hashFiles('CMakeLists.txt', 'mod.json.template', 'geobuild.py', 'cmake/**') }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ matrix.config.name }}-${{ hashFiles('CMakeLists.txt', 'mod.json.template', 'geobuild.py', 'cmake/**') }}-
+            build-${{ matrix.config.name }}-
+
       - name: Build the mod
         uses: geode-sdk/build-geode-mod@main
         env:
