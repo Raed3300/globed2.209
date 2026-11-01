@@ -49,7 +49,11 @@ jobs:
           GLOBED_SENTRY_URL: ${{ vars.GLOBED_SENTRY_URL }}
           GLOBED_SENTRY_KEY: ${{ vars.GLOBED_SENTRY_KEY }}
         with:
-          sdk: 'latest'
+          # 'latest' (the newest tagged Geode release, v5.11.2) still defaults to
+          # targeting GD 2.2081. The default moved to GD 2.2091 on Geode's main
+          # branch but hasn't been tagged in a release yet, so build against
+          # 'nightly' to actually target 2.2091.
+          sdk: 'nightly'
           build-config: ${{ matrix.config.build-config || 'Release' }}
           configure-args: '-DGLOBED_RELEASE=ON'
           export-pdb: true
