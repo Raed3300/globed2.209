@@ -120,6 +120,12 @@ jobs:
           find build/bindings -iname "*predeclare*" -o -iname "*Forward*"
           echo "=== search GeneratedBinding.hpp (all lines) for any gd-adjacent typedef ==="
           grep -n "typedef\|using " build/bindings/bindings/Geode/GeneratedBinding.hpp | head -20
+          echo "=== cat GeneratedPredeclare.hpp (first 150 lines) ==="
+          head -150 build/bindings/bindings/Geode/GeneratedPredeclare.hpp
+          echo "=== grep GeneratedPredeclare.hpp for gd ==="
+          grep -n "gd" build/bindings/bindings/Geode/GeneratedPredeclare.hpp
+          echo "=== wc GeneratedPredeclare.hpp ==="
+          wc -l build/bindings/bindings/Geode/GeneratedPredeclare.hpp
           echo "=== DONE ==="
 
       - name: Fail job if build actually failed
