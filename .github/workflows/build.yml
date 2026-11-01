@@ -67,11 +67,13 @@ jobs:
           GLOBED_SENTRY_URL: ${{ vars.GLOBED_SENTRY_URL }}
           GLOBED_SENTRY_KEY: ${{ vars.GLOBED_SENTRY_KEY }}
         with:
-          # 'latest' (the newest tagged Geode release, v5.11.2) still defaults to
-          # targeting GD 2.2081. The default moved to GD 2.2091 on Geode's main
-          # branch but hasn't been tagged in a release yet, so build against
-          # 'nightly' to actually target 2.2091.
-          sdk: 'nightly'
+          # GD 2.2091 isn't buildable yet: Geode's own bindings for it are still being
+          # actively written upstream (geode-sdk/bindings commits from literally days
+          # before this), to the point that even globed's own first-party code fails
+          # to compile against them (gd::string undeclared, API signature drift,
+          # etc.) - not something fixable via dependency pins. Target 2.2081, the
+          # latest tagged Geode release's default, until 2.2091 bindings stabilize.
+          sdk: 'latest'
           build-config: ${{ matrix.config.build-config || 'Release' }}
           configure-args: '-DGLOBED_RELEASE=ON'
           export-pdb: true
