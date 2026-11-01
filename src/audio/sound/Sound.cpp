@@ -1,5 +1,6 @@
 #include <globed/audio/sound/Sound.hpp>
 #include <globed/audio/AudioManager.hpp>
+#include <asp/fs.hpp>
 
 using namespace geode::prelude;
 
@@ -19,7 +20,7 @@ static auto mapError(FMOD_RESULT result) {
 Sound::Sound(FMOD::Sound* sound) : m_sound(sound) {}
 
 Result<std::shared_ptr<Sound>> Sound::create(const std::filesystem::path& path, bool paused) {
-    return create(utils::string::pathToString(path).c_str(), paused);
+    return create(asp::fs::Path::fromStdPath(path).string().c_str(), paused);
 }
 
 Result<std::shared_ptr<Sound>> Sound::create(const char* path, bool paused) {
@@ -102,7 +103,7 @@ void Sound::stop() {
 Result<FMOD::Sound*> Sound::createRaw(const char* path) {
     FMOD::Sound* sound = nullptr;
     auto e = system()->createSound(
-        utils::string::pathToString(path).c_str(),
+        path,
         FMOD_DEFAULT | FMOD_NONBLOCKING,
         nullptr,
         &sound

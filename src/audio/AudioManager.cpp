@@ -13,6 +13,7 @@
 #include <arc/future/Select.hpp>
 #include <arc/time/Sleep.hpp>
 #include <arc/time/Interval.hpp>
+#include <asp/iter.hpp>
 
 using namespace geode::prelude;
 using enum std::memory_order;

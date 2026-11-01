@@ -1,5 +1,6 @@
 #include <globed/audio/sound/PlayerSound.hpp>
 #include <globed/core/game/RemotePlayer.hpp>
+#include <asp/fs.hpp>
 
 using namespace geode::prelude;
 
@@ -13,7 +14,7 @@ Result<std::shared_ptr<PlayerSound>> PlayerSound::create(
     std::shared_ptr<RemotePlayer> player,
     bool paused
 ) {
-    return create(utils::string::pathToString(path).c_str(), player, paused);
+    return create(asp::fs::Path::fromStdPath(path).string().c_str(), player, paused);
 }
 
 Result<std::shared_ptr<PlayerSound>> PlayerSound::create(

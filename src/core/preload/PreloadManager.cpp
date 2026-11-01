@@ -201,7 +201,10 @@ void PreloadManager::loadNextBatch(PreloadOptions options) {
     }
 
     int remainingCost = asp::iter::from(m_loadQueue)
-        .map([](auto item) {
+        // PreloadItem is move-only; take by const& since the iterator borrows from
+        // m_loadQueue rather than consuming it (std::invocable now requires the
+        // callback to accept the item without copying).
+        .map([](const auto& item) {
             return item.iconType == IconType::DeathEffect ? 20 : 1;
         })
         .sum();
@@ -450,12 +453,12 @@ void PreloadManager::initSessionState() {
     // dirs::getGameDir()/getGeodeDir()/Mod::getConfigDir() now return asp::fs::Path
     // rather than std::filesystem::path; convert explicitly since there's no longer
     // an implicit conversion between the two.
-    fs::path resourceDir = (dirs::getGameDir() / "Resources").toStdPath().unwrapOr({});
-    fs::path textureLdrUnzipped = (dirs::getGeodeDir() / "unzipped" / "geode.texture-loader" / "resources").toStdPath().unwrapOr({});
+    fs::path resourceDir = (dirs::getGameDir() / "Resources").toStdPath().unwrapOr(std::filesystem::path{});
+    fs::path textureLdrUnzipped = (dirs::getGeodeDir() / "unzipped" / "geode.texture-loader" / "resources").toStdPath().unwrapOr(std::filesystem::path{});
     fs::path highGraphicsFolder;
 
     if (auto mod = Loader::get()->getLoadedMod("weebify.high-graphics-android")) {
-        highGraphicsFolder = (mod->getConfigDir(false) / Loader::get()->getGameVersion()).toStdPath().unwrapOr({});
+        highGraphicsFolder = (mod->getConfigDir(false) / Loader::get()->getGameVersion()).toStdPath().unwrapOr(std::filesystem::path{});
         if (!asp::fs::exists(asp::fs::Path::fromStdPath(highGraphicsFolder))) {
             highGraphicsFolder.clear();
         }

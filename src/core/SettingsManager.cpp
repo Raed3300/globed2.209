@@ -147,7 +147,7 @@ void SettingsManager::loadSaveSlots() {
     (void) Mod::get()->loadData();
 
     // Mod::getSaveDir() now returns asp::fs::Path rather than std::filesystem::path.
-    m_slotDir = (Mod::get()->getSaveDir() / "save-slots-v2").toStdPath().unwrapOr({});
+    m_slotDir = (Mod::get()->getSaveDir() / "save-slots-v2").toStdPath().unwrapOr(std::filesystem::path{});
     auto oldDir = Mod::get()->getSaveDir() / "saveslots";
 
     bool createdNewDir = false;
@@ -156,7 +156,7 @@ void SettingsManager::loadSaveSlots() {
         if (!res) {
             log::error("Failed to create save slots directory at {}: {}", m_slotDir, res.unwrapErr().message());
             log::warn("Will be using root of the save directory for storage");
-            m_slotDir = Mod::get()->getSaveDir().toStdPath().unwrapOr({});
+            m_slotDir = Mod::get()->getSaveDir().toStdPath().unwrapOr(std::filesystem::path{});
         } else {
             createdNewDir = true;
         }

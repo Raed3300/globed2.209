@@ -28,7 +28,7 @@ void EmoteManager::registerEmote(uint32_t id, std::string name) {
 }
 
 void EmoteManager::registerSfx(uint32_t id, const std::filesystem::path& name) {
-    m_sfxPaths[id] = utils::string::pathToString(name);
+    m_sfxPaths[id] = asp::fs::Path::fromStdPath(name).string();
 }
 
 CCSprite* EmoteManager::createEmote(uint32_t id) {
@@ -130,9 +130,17 @@ $on_game(Loaded) {
     }
 
     // register sfx
-    if (auto res = asp::fs::iterdir(Mod::get()->getResourcesDir())) {
-        for (auto& entry : *res) {
-            auto name = utils::string::pathToString(entry.path().filename());
+    // NOTE: iterdir -> iterDir rename, and DirectoryIterator now yields
+    // Result<DirectoryEntry> (fallible per-entry) where `path` is a plain member
+    // (asp::fs::Path), not a method, as part of asp2's newer fs:: API.
+    if (auto res = asp::fs::iterDir(Mod::get()->getResourcesDir())) {
+        for (auto entry : *res) {
+            if (!entry) continue;
+            auto de = std::move(entry).unwrap();
+
+            auto filename = de.path.filename();
+            if (!filename) continue;
+            auto name = std::string(*filename);
 
             if (!name.starts_with("emote_sfx_") || !name.ends_with(".ogg")) {
                 continue;
@@ -146,7 +154,7 @@ $on_game(Loaded) {
 
             if (num == (uint32_t)-1) continue;
 
-            em.registerSfx(num, entry.path());
+            em.registerSfx(num, de.path.toStdPath().unwrapOr(std::filesystem::path{}));
         }
     }
 
