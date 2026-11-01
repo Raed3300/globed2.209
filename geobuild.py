@@ -31,7 +31,7 @@ XTLS_VERSION = "e29f88a"
 QUNET_REPO = "coolgameriguess/qunet-cpp"
 QUNET_VERSION = "5ef11c5"
 ARGON_REPO = "coolgameriguess/argon"
-ARGON_VERSION = "b4e3961"
+ARGON_VERSION = "8e03432"
 SERVER_SHARED_VERSION = "00359d3"
 CUE_VERSION = "e80ac94"
 
