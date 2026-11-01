@@ -109,6 +109,17 @@ jobs:
           cat geode-sdk-clone/VERSION
           echo "=== bindings-src commit ==="
           cd build/_deps/bindings-src && git rev-parse HEAD && git log -1 --format=%cd
+          cd - > /dev/null
+          echo "=== CodegenData.json size and gd-related content ==="
+          wc -c build/bindings/bindings/Geode/CodegenData.json
+          grep -o '"gd"[^,}]*' build/bindings/bindings/Geode/CodegenData.json | head -5
+          grep -c "gd::" build/bindings/bindings/Geode/CodegenData.json
+          echo "=== strings in Codegen.exe mentioning gd::string (context) ==="
+          strings build/bindings/codegen/Codegen.exe 2>/dev/null | grep -i "namespace gd\|^gd::\|gdstring\|gd_string" | head -10
+          echo "=== check predeclare/forward decl output file ==="
+          find build/bindings -iname "*predeclare*" -o -iname "*Forward*"
+          echo "=== search GeneratedBinding.hpp (all lines) for any gd-adjacent typedef ==="
+          grep -n "typedef\|using " build/bindings/bindings/Geode/GeneratedBinding.hpp | head -20
           echo "=== DONE ==="
 
       - name: Fail job if build actually failed
