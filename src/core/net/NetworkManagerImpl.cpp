@@ -17,6 +17,7 @@
 #include <kj/exception.h>
 #include <arc/future/Select.hpp>
 #include <arc/time/Sleep.hpp>
+#include <asp/fs.hpp>
 #include <argon/argon.hpp>
 #include <qunet/Pinger.hpp>
 #include <qunet/dns/Resolver.hpp>
@@ -1740,7 +1741,9 @@ std::vector<uint8_t> NetworkManagerImpl::computeUident(int accountId) {
 #endif
     wd.v5 = strlen(wd.v4);
 
-    auto sdir = utils::string::pathToString(Mod::get()->getSaveDir());
+    // geode::utils::string::pathToString was removed; asp::fs::Path::string() is Geode's
+    // own replacement for safe (UTF-8) std::filesystem::path -> std::string conversion now.
+    auto sdir = asp::fs::Path::fromStdPath(Mod::get()->getSaveDir()).string();
     wd.v6 = sdir.c_str();
     wd.v7 = sdir.size();
 

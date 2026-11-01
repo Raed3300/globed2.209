@@ -23,7 +23,7 @@ void ConnectionLogger::resetInternal() {
     if (!m_curLog.empty()) {
         log::info("Dumping all connection logs to {}", m_curPath);
 
-        if (auto err = asp::fs::write(m_curPath / "log.txt", m_curLog).err()) {
+        if (auto err = asp::fs::write(asp::fs::Path::fromStdPath(m_curPath / "log.txt"), m_curLog).err()) {
             log::error("ConnectionLogger: failed to write log file: {}", err);
         }
     }
@@ -109,8 +109,8 @@ void ConnectionLogger::reset() {
 
 Future<> ConnectionLogger::doLog(PacketLog log) {
     co_await arc::spawnBlocking<void>([this, log = std::move(log)] {
-        if (!asp::fs::exists(m_curPath)) {
-            if (auto err = asp::fs::createDirAll(m_curPath).err()) {
+        if (!asp::fs::exists(asp::fs::Path::fromStdPath(m_curPath))) {
+            if (auto err = asp::fs::createDirAll(asp::fs::Path::fromStdPath(m_curPath)).err()) {
                 log::error("ConnectionLogger: failed to create log directory: {}", err->message());
                 return;
             }
@@ -120,7 +120,7 @@ Future<> ConnectionLogger::doLog(PacketLog log) {
         auto filename = fmt::format("{:.3}s_{}.bin", m_startTime.elapsed().seconds<double>(), direction);
         auto path = m_curPath / filename;
 
-        if (auto err = asp::fs::write(path, log.data).err()) {
+        if (auto err = asp::fs::write(asp::fs::Path::fromStdPath(path), log.data).err()) {
             log::error("ConnectionLogger: failed to write packet log file: {}", err);
         }
     });

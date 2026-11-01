@@ -49,7 +49,7 @@ void ProfilerOverlay::redraw() {
     float xstep = m_drawSize.width / static_cast<float>(count);
 
     float maxTime = asp::iter::from(m_frames)
-        .map([](auto ref) { return ref.get().second.totalTime.template seconds<float>(); })
+        .map([](auto el) { return el.second.totalTime.template seconds<float>(); })
         .max()
         .value_or(0.f);
 

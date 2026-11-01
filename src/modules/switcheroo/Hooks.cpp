@@ -124,7 +124,7 @@ void APSController::repushButtons() {
 }
 
 void APSController::rescheduleNextSwitch(float delayS) {
-    m_nextSwitch = asp::Instant::now() + *asp::Duration::fromSecs(delayS);
+    m_nextSwitch = asp::Instant::now() + asp::Duration::fromSecs(delayS);
 }
 
 std::optional<APSSwitchEvent> APSController::poll() {
@@ -141,7 +141,7 @@ std::optional<APSSwitchEvent> APSController::poll() {
         return APSSwitchEvent {
             player, SwitchType::Switch,
         };
-    } else if (!m_warned && untilSwitch < *asp::Duration::fromSecs(m_settings.m_warningDelay)) {
+    } else if (!m_warned && untilSwitch < asp::Duration::fromSecs(m_settings.m_warningDelay)) {
         // calculate player and show warning
         m_detNext = this->pickNextPlayer();
         m_warned = true;
@@ -160,7 +160,7 @@ void APSController::calculateNextSwitch() {
     float var = std::abs(m_settings.m_intervalVar);
     float base = std::abs(m_settings.m_interval);
     float untilNext = utils::random::generate<float>(base - var, base + var);
-    m_nextSwitch = asp::Instant::now() + *asp::Duration::fromSecs(untilNext);
+    m_nextSwitch = asp::Instant::now() + asp::Duration::fromSecs(untilNext);
 }
 
 int APSController::pickNextPlayer() {
@@ -215,7 +215,14 @@ void APSController::getAllPlayers() {
 // PlayLayer
 
 bool APSPlayLayer::init(GJGameLevel* level, bool a, bool b) {
+    // PlayLayer::init dropped its middle "useReplay" parameter as of GD 2.2091
+    // (bindings/2.2091/GeometryDash.bro: bool init(GJGameLevel*, bool) vs the
+    // 3-arg bool init(GJGameLevel*, bool, bool) on 2.2081 and earlier).
+#if GEODE_COMP_GD_VERSION >= 22091
+    if (!PlayLayer::init(level, b)) return false;
+#else
     if (!PlayLayer::init(level, a, b)) return false;
+#endif
 
     auto& fields = *m_fields.self();
     fields.m_myAccountId = GJAccountManager::get()->m_accountID;
