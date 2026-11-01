@@ -17,24 +17,26 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - name: Windows
-            os: windows-latest
-            build-config: RelWithDebInfo
+          # TEMPORARY: other platforms disabled while diagnosing 2.2091's "gd"
+          # namespace issue. Restore before merging.
+          # - name: Windows
+          #   os: windows-latest
+          #   build-config: RelWithDebInfo
 
-          - name: macOS
-            os: macos-latest
+          # - name: macOS
+          #   os: macos-latest
 
-          - name: iOS
-            os: macos-latest
-            target: iOS
+          # - name: iOS
+          #   os: macos-latest
+          #   target: iOS
 
           - name: Android32
             os: ubuntu-latest
             target: Android32
 
-          - name: Android64
-            os: ubuntu-latest
-            target: Android64
+          # - name: Android64
+          #   os: ubuntu-latest
+          #   target: Android64
 
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -62,18 +64,18 @@ jobs:
             build-${{ matrix.config.name }}-${{ hashFiles('CMakeLists.txt', 'mod.json.template', 'geobuild.py', 'cmake/**') }}-
 
       - name: Build the mod
+        id: build_the_mod
+        continue-on-error: true
         uses: geode-sdk/build-geode-mod@main
         env:
           GLOBED_SENTRY_URL: ${{ vars.GLOBED_SENTRY_URL }}
           GLOBED_SENTRY_KEY: ${{ vars.GLOBED_SENTRY_KEY }}
         with:
-          # GD 2.2091 isn't buildable yet: Geode's own bindings for it are still being
-          # actively written upstream (geode-sdk/bindings commits from literally days
-          # before this), to the point that even globed's own first-party code fails
-          # to compile against them (gd::string undeclared, API signature drift,
-          # etc.) - not something fixable via dependency pins. Target 2.2081, the
-          # latest tagged Geode release's default, until 2.2091 bindings stabilize.
-          sdk: 'latest'
+          # 'latest' (the newest tagged Geode release, v5.11.2) still defaults to
+          # targeting GD 2.2081. The default moved to GD 2.2091 on Geode's main
+          # branch but hasn't been tagged in a release yet, so build against
+          # 'nightly' to actually target 2.2091.
+          sdk: 'nightly'
           build-config: ${{ matrix.config.build-config || 'Release' }}
           configure-args: '-DGLOBED_RELEASE=ON'
           export-pdb: true
@@ -82,6 +84,31 @@ jobs:
           target: ${{ matrix.config.target }}
           # sccache is broken on macos, so use no cache there :(
           ccache-variant: ${{ matrix.config.os != 'macos-latest' && 'sccache' || '' }}
+
+      # TEMPORARY thorough diagnostic for the "gd" namespace issue.
+      - name: Debug - locate namespace gd thoroughly
+        if: always()
+        shell: bash
+        run: |
+          echo "=== bindings generated dir listing ==="
+          find build/bindings -maxdepth 4 2>/dev/null | head -100
+          echo "=== full generated binding/ header count ==="
+          find build/bindings -iname "*.hpp" 2>/dev/null | wc -l
+          echo "=== searching ENTIRE workspace for 'namespace gd' ==="
+          grep -rn "namespace gd\b" / --include="*.hpp" --include="*.h" --include="*.cpp" 2>/dev/null | head -20
+          echo "=== searching for 'using string' near 'gd' context ==="
+          grep -rn "gd::string\b" build/bindings 2>/dev/null | head -5
+          echo "=== check if GeneratedSource.cpp defines gd namespace ==="
+          find build -iname "GeneratedSource.cpp" -exec grep -l "namespace gd" {} \; 2>/dev/null
+          find build -iname "GeneratedSource.cpp" -exec wc -l {} \; 2>/dev/null
+          echo "=== geode-sdk-clone version info ==="
+          cat geode-sdk-clone/VERSION 2>/dev/null || echo "no VERSION file"
+          echo "=== bindings-src commit ==="
+          cd build/_deps/bindings-src 2>/dev/null && git rev-parse HEAD 2>/dev/null && git log -1 --format=%cd 2>/dev/null
+
+      - name: Fail job if build actually failed
+        if: steps.build_the_mod.outcome == 'failure'
+        run: exit 1
 
   package:
     name: Package builds
