@@ -17,27 +17,24 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          # TEMPORARY: other platforms disabled while diagnosing the `gd` namespace
-          # issue on 2.2091 - fastest single platform to iterate on. Restore before
-          # merging.
-          # - name: Windows
-          #   os: windows-latest
-          #   build-config: RelWithDebInfo
+          - name: Windows
+            os: windows-latest
+            build-config: RelWithDebInfo
 
-          # - name: macOS
-          #   os: macos-latest
+          - name: macOS
+            os: macos-latest
 
-          # - name: iOS
-          #   os: macos-latest
-          #   target: iOS
+          - name: iOS
+            os: macos-latest
+            target: iOS
 
           - name: Android32
             os: ubuntu-latest
             target: Android32
 
-          # - name: Android64
-          #   os: ubuntu-latest
-          #   target: Android64
+          - name: Android64
+            os: ubuntu-latest
+            target: Android64
 
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -65,18 +62,18 @@ jobs:
             build-${{ matrix.config.name }}-${{ hashFiles('CMakeLists.txt', 'mod.json.template', 'geobuild.py', 'cmake/**') }}-
 
       - name: Build the mod
-        id: build_the_mod
-        continue-on-error: true
         uses: geode-sdk/build-geode-mod@main
         env:
           GLOBED_SENTRY_URL: ${{ vars.GLOBED_SENTRY_URL }}
           GLOBED_SENTRY_KEY: ${{ vars.GLOBED_SENTRY_KEY }}
         with:
-          # 'latest' (the newest tagged Geode release, v5.11.2) still defaults to
-          # targeting GD 2.2081. The default moved to GD 2.2091 on Geode's main
-          # branch but hasn't been tagged in a release yet, so build against
-          # 'nightly' to actually target 2.2091.
-          sdk: 'nightly'
+          # GD 2.2091 isn't buildable yet: Geode's own bindings for it are still being
+          # actively written upstream (geode-sdk/bindings commits from literally days
+          # before this), to the point that even globed's own first-party code fails
+          # to compile against them (gd::string undeclared, API signature drift,
+          # etc.) - not something fixable via dependency pins. Target 2.2081, the
+          # latest tagged Geode release's default, until 2.2091 bindings stabilize.
+          sdk: 'latest'
           build-config: ${{ matrix.config.build-config || 'Release' }}
           configure-args: '-DGLOBED_RELEASE=ON'
           export-pdb: true
@@ -85,24 +82,6 @@ jobs:
           target: ${{ matrix.config.target }}
           # sccache is broken on macos, so use no cache there :(
           ccache-variant: ${{ matrix.config.os != 'macos-latest' && 'sccache' || '' }}
-
-      # TEMPORARY diagnostic: find where `namespace gd` actually comes from in the
-      # generated bindings tree, to root-cause "undeclared identifier 'gd'" instead
-      # of guessing. Remove this step once that's answered.
-      - name: Debug - locate namespace gd
-        if: always()
-        shell: bash
-        run: |
-          echo "--- searching build/ for 'namespace gd' ---"
-          grep -rn "namespace gd" build/ 2>/dev/null | head -30 || echo "(no matches in build/)"
-          echo "--- searching build/ for 'gd::string' definitions (not just usage) ---"
-          grep -rln "using string" build/ 2>/dev/null | xargs -r grep -l "gd" 2>/dev/null | head -10
-          echo "--- listing generated bindings predeclare-ish headers ---"
-          find build -iname "*redeclare*" -o -iname "*GeneratedSource*" -o -iname "*Prelude*" 2>/dev/null | head -30
-
-      - name: Fail job if build actually failed
-        if: steps.build_the_mod.outcome == 'failure'
-        run: exit 1
 
   package:
     name: Package builds
