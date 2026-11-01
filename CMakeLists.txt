@@ -28,6 +28,13 @@ set(GEODE_CODEGEN_EXTRA_ARGS "--skip-pugixml" CACHE STRING "" FORCE)
 # GD 2.2091) requires, so let Geode's own default (asp2@1.5.3) apply instead.
 set(GEODE_NO_PUGIXML_HEADER ON CACHE BOOL "" FORCE)
 
+# GD 2.2091's bindings dropped gd::string/gd::vector/etc. for plain std:: equivalents
+# (see cmake/GdCompatShim.hpp for the full rationale/evidence). Force-include this
+# project-wide (including into CPM-fetched deps like argon/qunet-cpp) so any code
+# still written against the old gd:: names keeps compiling; it's a no-op for any
+# other GD version since its content is gated behind GEODE_COMP_GD_VERSION.
+add_compile_options("-include" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/GdCompatShim.hpp")
+
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 # Work around an upstream geode-sdk/bindings bug (see geode-sdk/bindings#1390, unmerged):

@@ -64,8 +64,6 @@ jobs:
             build-${{ matrix.config.name }}-${{ hashFiles('CMakeLists.txt', 'mod.json.template', 'geobuild.py', 'cmake/**') }}-
 
       - name: Build the mod
-        id: build_the_mod
-        continue-on-error: true
         uses: geode-sdk/build-geode-mod@main
         env:
           GLOBED_SENTRY_URL: ${{ vars.GLOBED_SENTRY_URL }}
@@ -84,53 +82,6 @@ jobs:
           target: ${{ matrix.config.target }}
           # sccache is broken on macos, so use no cache there :(
           ccache-variant: ${{ matrix.config.os != 'macos-latest' && 'sccache' || '' }}
-
-      # TEMPORARY thorough diagnostic for the "gd" namespace issue.
-      - name: Debug - locate namespace gd thoroughly
-        if: always()
-        shell: bash
-        run: |
-          set +e
-          echo "=== cat GeneratedBinding.hpp (first 100 lines) ==="
-          head -100 build/bindings/bindings/Geode/GeneratedBinding.hpp
-          echo "=== grep GeneratedBinding.hpp for gd ==="
-          grep -n "gd" build/bindings/bindings/Geode/GeneratedBinding.hpp
-          echo "=== full generated binding/ header count ==="
-          find build/bindings -iname "*.hpp" | wc -l
-          echo "=== searching ENTIRE workspace for 'namespace gd' ==="
-          grep -rn "namespace gd" / --include="*.hpp" --include="*.h" --include="*.cpp" 2>/dev/null
-          echo "(search done)"
-          echo "=== searching for 'gd::string' usage in build/bindings ==="
-          grep -rln "gd::string" build/bindings
-          echo "=== check if GeneratedSource.cpp defines gd namespace ==="
-          find build -iname "GeneratedSource.cpp" -exec grep -l "namespace gd" {} \;
-          find build -iname "GeneratedSource.cpp" -exec wc -l {} \;
-          echo "=== geode-sdk-clone version info ==="
-          cat geode-sdk-clone/VERSION
-          echo "=== bindings-src commit ==="
-          cd build/_deps/bindings-src && git rev-parse HEAD && git log -1 --format=%cd
-          cd - > /dev/null
-          echo "=== CodegenData.json size and gd-related content ==="
-          wc -c build/bindings/bindings/Geode/CodegenData.json
-          grep -o '"gd"[^,}]*' build/bindings/bindings/Geode/CodegenData.json | head -5
-          grep -c "gd::" build/bindings/bindings/Geode/CodegenData.json
-          echo "=== strings in Codegen.exe mentioning gd::string (context) ==="
-          strings build/bindings/codegen/Codegen.exe 2>/dev/null | grep -i "namespace gd\|^gd::\|gdstring\|gd_string" | head -10
-          echo "=== check predeclare/forward decl output file ==="
-          find build/bindings -iname "*predeclare*" -o -iname "*Forward*"
-          echo "=== search GeneratedBinding.hpp (all lines) for any gd-adjacent typedef ==="
-          grep -n "typedef\|using " build/bindings/bindings/Geode/GeneratedBinding.hpp | head -20
-          echo "=== cat GeneratedPredeclare.hpp (first 150 lines) ==="
-          head -150 build/bindings/bindings/Geode/GeneratedPredeclare.hpp
-          echo "=== grep GeneratedPredeclare.hpp for gd ==="
-          grep -n "gd" build/bindings/bindings/Geode/GeneratedPredeclare.hpp
-          echo "=== wc GeneratedPredeclare.hpp ==="
-          wc -l build/bindings/bindings/Geode/GeneratedPredeclare.hpp
-          echo "=== DONE ==="
-
-      - name: Fail job if build actually failed
-        if: steps.build_the_mod.outcome == 'failure'
-        run: exit 1
 
   package:
     name: Package builds
