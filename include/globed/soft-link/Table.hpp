@@ -191,7 +191,12 @@ static_assert(sizeof(RootApiTable) == sizeof(void*) * 64);
 
 #if !defined GLOBED_BUILD || defined GEODE_DEFINE_EVENT_EXPORTS
 #define GLOBED_SOFTLINK_API_EVENT_EXPORTED
-inline geode::Result<RootApiTable*> getRootTable() GEODE_EVENT_EXPORT(&getRootTable, ());
+// NOTE: Geode removed the old GEODE_EVENT_EXPORT_NORES macro family (see
+// geode-sdk/geode commit "remove nores macros") in favor of GEODE_EVENT_EXPORT
+// itself handling both the caller and definer side based on whether
+// GEODE_DEFINE_EVENT_EXPORTS is set, so this is now a full declaration macro
+// rather than something appended after a function declarator.
+GEODE_EVENT_EXPORT(geode::Result<RootApiTable*>, getRootTable, (), ());
 #else
 geode::Result<RootApiTable*> getRootTable();
 #endif

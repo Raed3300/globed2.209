@@ -258,7 +258,7 @@ $on_mod(Loaded) {
         popup.showQueue();
 
         if (auto title = popup.getInner()->m_mainLayer->getChildByType<CCLabelBMFont>(0)) {
-            title->limitLabelWidth(360.f, 0.9f, 0.5f);
+            title->setLimitLabelWidth(360.f, 0.9f, 0.5f);
         }
     });
 

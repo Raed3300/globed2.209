@@ -27,7 +27,7 @@ struct GLOBED_MODIFY_ATTR HookedEndLevelLayer : geode::Modify<HookedEndLevelLaye
 
             if (endText) {
                 endText->setString(msg);
-                endText->limitLabelWidth(150.0, 0.8, 0.0);
+                endText->setLimitLabelWidth(150.0, 0.8, 0.0);
             }
         }
     }

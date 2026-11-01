@@ -35,7 +35,18 @@
 #include <argon/argon.hpp>
 #include <cue/RepeatingBackground.hpp>
 #include <UIBuilder.hpp>
+
+#include <Geode/loader/Dispatch.hpp>
+// The geode.devtools package currently published on the index still uses the old
+// GEODE_EVENT_EXPORT_NORES macro family, which Geode removed (see geode-sdk/geode
+// commit "remove nores macros"); its GitHub source has already been fixed for the
+// new GEODE_EVENT_EXPORT API but no release with that fix has been published yet.
+// Skip this optional integration entirely when the macro isn't available, rather
+// than depending on an index package we can't control the version of.
+#ifdef GEODE_EVENT_EXPORT_NORES
 #include <geode.devtools/include/API.hpp>
+#define GLOBED_HAS_DEVTOOLS 1
+#endif
 
 using namespace geode::prelude;
 using namespace asp::time;
@@ -1235,9 +1246,11 @@ bool GlobedMenuLayer::shouldAutoRefresh(float dt) {
     }
 
     // don't refresh if devtools is open
+#ifdef GLOBED_HAS_DEVTOOLS
     if (devtools::isOpen()) {
         return false;
     }
+#endif
 
     return true;
 }

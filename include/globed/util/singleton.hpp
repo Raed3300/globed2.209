@@ -19,8 +19,7 @@ void singletonExportCheck();
 
 template <typename T>
 constexpr std::string_view getTypenameConstexpr() {
-    auto [p, size] = arc::getTypename<T>();
-    return {p, size};
+    return arc::getTypename<T>();
 }
 
 template <typename Derived>
