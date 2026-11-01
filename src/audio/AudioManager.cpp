@@ -666,9 +666,13 @@ std::string guidToString(const FMOD_GUID& guid) {
 }
 
 FMOD_GUID stringToGuid(std::string_view str) {
-    std::string s = asp::iter::from(str).filter([](char c) {
-        return c != '-';
-    }).collect<std::string>();
+    // std::string isn't registered as an asp::iter Collector, so build this manually
+    // instead of via .filter(...).collect<std::string>().
+    std::string s;
+    s.reserve(str.size());
+    for (char c : str) {
+        if (c != '-') s.push_back(c);
+    }
 
     FMOD_GUID guid{};
 

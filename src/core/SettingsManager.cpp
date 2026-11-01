@@ -173,7 +173,7 @@ void SettingsManager::loadSaveSlots() {
             break;
         }
 
-        auto res = geode::utils::file::readJson(slotp);
+        auto res = geode::utils::file::readJson(asp::fs::Path::fromStdPath(slotp));
         if (!res) {
             log::error("Failed to read save slot {}: {}", i, res.unwrapErr());
             continue;
@@ -351,7 +351,7 @@ void SettingsManager::migrateOldSettings() {
         //     continue;
         // }
 
-        if (auto err = geode::utils::file::writeStringSafe(newp, migrated->dump()).err()) {
+        if (auto err = geode::utils::file::writeStringSafe(asp::fs::Path::fromStdPath(newp), migrated->dump()).err()) {
             log::error("Failed to write migrated save slot {}: {}", i, *err);
             continue;
         }
@@ -374,7 +374,7 @@ void SettingsManager::freeze() {
 void SettingsManager::commitSlotsToDisk() {
     for (size_t i = 0; i < m_saveSlots.size(); i++) {
         auto slotp = m_slotDir / fmt::format("{}.json", i);
-        auto res = geode::utils::file::writeStringSafe(slotp, m_saveSlots[i].dump());
+        auto res = geode::utils::file::writeStringSafe(asp::fs::Path::fromStdPath(slotp), m_saveSlots[i].dump());
 
         if (!res) {
             log::error("Failed to write save slot {}: {}", i, res.unwrapErr());
