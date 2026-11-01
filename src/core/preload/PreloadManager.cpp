@@ -202,7 +202,7 @@ void PreloadManager::loadNextBatch(PreloadOptions options) {
 
     int remainingCost = asp::iter::from(m_loadQueue)
         .map([](auto item) {
-            return item.get().iconType == IconType::DeathEffect ? 20 : 1;
+            return item.iconType == IconType::DeathEffect ? 20 : 1;
         })
         .sum();
 
@@ -434,17 +434,29 @@ void PreloadManager::doLoadBatch(std::vector<PreloadItem> items, PreloadOptions 
     state->cleanup();
 }
 
+// asp::fs::equivalent was removed from asp2 (now built on asp::fs::Path rather than
+// std::filesystem); std::filesystem::equivalent is the std-library equivalent and
+// these are already std::filesystem::path values.
+static bool pathsEquivalent(const fs::path& a, const fs::path& b) {
+    std::error_code ec;
+    bool result = fs::equivalent(a, b, ec);
+    return !ec && result;
+}
+
 void PreloadManager::initSessionState() {
     m_sstate.preInitTime = Instant::now();
     m_sstate.texQuality = getTextureQuality();
 
-    fs::path resourceDir = dirs::getGameDir() / "Resources";
-    fs::path textureLdrUnzipped = dirs::getGeodeDir() / "unzipped" / "geode.texture-loader" / "resources";
+    // dirs::getGameDir()/getGeodeDir()/Mod::getConfigDir() now return asp::fs::Path
+    // rather than std::filesystem::path; convert explicitly since there's no longer
+    // an implicit conversion between the two.
+    fs::path resourceDir = (dirs::getGameDir() / "Resources").toStdPath().unwrapOr({});
+    fs::path textureLdrUnzipped = (dirs::getGeodeDir() / "unzipped" / "geode.texture-loader" / "resources").toStdPath().unwrapOr({});
     fs::path highGraphicsFolder;
 
     if (auto mod = Loader::get()->getLoadedMod("weebify.high-graphics-android")) {
-        highGraphicsFolder = mod->getConfigDir(false) / Loader::get()->getGameVersion();
-        if (!asp::fs::exists(highGraphicsFolder)) {
+        highGraphicsFolder = (mod->getConfigDir(false) / Loader::get()->getGameVersion()).toStdPath().unwrapOr({});
+        if (!asp::fs::exists(asp::fs::Path::fromStdPath(highGraphicsFolder))) {
             highGraphicsFolder.clear();
         }
     }
@@ -454,14 +466,14 @@ void PreloadManager::initSessionState() {
         std::string_view sv{path};
         auto fspath = fs::path(sv);
 
-        if (asp::fs::equivalent(fspath, highGraphicsFolder).unwrapOr(false)) {
+        if (pathsEquivalent(fspath, highGraphicsFolder)) {
             m_sstate.highTexturesIdx = idx;
         }
 
         if (sv.find("geode.texture-loader") != sv.npos) {
             // this might be the unzipped/ folder, if so, ignore it
             // if the check failed, or if the path isn't equivalent to unzipped, count it as a texture pack folder
-            if (!asp::fs::equivalent(fspath, textureLdrUnzipped).unwrapOr(false)) {
+            if (!pathsEquivalent(fspath, textureLdrUnzipped)) {
                 m_sstate.hasTexturePack = true;
                 m_sstate.texturePackIndices.push_back(idx);
             }
@@ -476,7 +488,7 @@ void PreloadManager::initSessionState() {
             m_sstate.gameSearchPathIdx = idx;
         }
 #else
-        if (asp::fs::equivalent(fspath, resourceDir).unwrapOr(false)) {
+        if (pathsEquivalent(fspath, resourceDir)) {
             m_sstate.gameSearchPathIdx = idx;
         }
 #endif
@@ -680,7 +692,7 @@ gd::string PreloadManager::fullPathForFilename(std::string_view input, bool igno
 
     // try the real gd resource folder
 #ifdef GEODE_IS_DESKTOP
-    auto realResources = string::pathToString(dirs::getResourcesDir());
+    auto realResources = dirs::getResourcesDir().string();
     if (!realResources.empty()) {
         TRY_PATH(realResources);
     }

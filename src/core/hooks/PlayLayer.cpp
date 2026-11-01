@@ -38,7 +38,13 @@ struct GLOBED_MODIFY_ATTR HookedPlayLayer : geode::Modify<HookedPlayLayer, PlayL
             gm->m_showProgressBar = true;
         }
 
+        // PlayLayer::init dropped its middle "useReplay" parameter as of GD 2.2091
+        // (see bindings/2.2091/GeometryDash.bro vs 2.2081's).
+#if GEODE_COMP_GD_VERSION >= 22091
+        if (!PlayLayer::init(level, b)) return false;
+#else
         if (!PlayLayer::init(level, a, b)) return false;
+#endif
 
         gjbgl->setupPostInit();
 

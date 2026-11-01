@@ -1131,7 +1131,9 @@ Future<> NetworkManagerImpl::threadSetupLogger(bool central) {
     if (!opt) {
         opt.emplace();
 
-        auto base = Mod::get()->getConfigDir() / (central ? "central-logs" : "game-logs");
+        // Mod::getConfigDir() now returns asp::fs::Path, but ConnectionLogger::setup
+        // still takes std::filesystem::path.
+        auto base = (Mod::get()->getConfigDir() / (central ? "central-logs" : "game-logs")).toStdPath().unwrapOr({});
         co_await opt->setup(std::move(base));
     }
 

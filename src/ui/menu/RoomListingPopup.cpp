@@ -240,7 +240,7 @@ void RoomListingPopup::populateList() {
     m_list->clear();
 
     for (auto room : asp::iter::from(m_allRooms[m_page])) {
-        m_list->addCell(RoomListingCell::create(room.get(), this));
+        m_list->addCell(RoomListingCell::create(room, this));
     }
 
     this->updateTitle(m_totalRooms ?: m_list->size());

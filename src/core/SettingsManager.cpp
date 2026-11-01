@@ -146,16 +146,17 @@ SettingsManager::SettingsManager() {
 void SettingsManager::loadSaveSlots() {
     (void) Mod::get()->loadData();
 
-    m_slotDir = Mod::get()->getSaveDir() / "save-slots-v2";
+    // Mod::getSaveDir() now returns asp::fs::Path rather than std::filesystem::path.
+    m_slotDir = (Mod::get()->getSaveDir() / "save-slots-v2").toStdPath().unwrapOr({});
     auto oldDir = Mod::get()->getSaveDir() / "saveslots";
 
     bool createdNewDir = false;
-    if (!asp::fs::exists(m_slotDir)) {
-        auto res = asp::fs::createDirAll(m_slotDir);
+    if (!asp::fs::exists(asp::fs::Path::fromStdPath(m_slotDir))) {
+        auto res = asp::fs::createDirAll(asp::fs::Path::fromStdPath(m_slotDir));
         if (!res) {
             log::error("Failed to create save slots directory at {}: {}", m_slotDir, res.unwrapErr().message());
             log::warn("Will be using root of the save directory for storage");
-            m_slotDir = Mod::get()->getSaveDir();
+            m_slotDir = Mod::get()->getSaveDir().toStdPath().unwrapOr({});
         } else {
             createdNewDir = true;
         }
@@ -168,7 +169,7 @@ void SettingsManager::loadSaveSlots() {
 
     for (size_t i = 0;; i++) {
         auto slotp = m_slotDir / fmt::format("{}.json", i);
-        if (!asp::fs::exists(slotp)) {
+        if (!asp::fs::exists(asp::fs::Path::fromStdPath(slotp))) {
             break;
         }
 

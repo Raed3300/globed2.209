@@ -88,7 +88,13 @@ void WarpLoadPopup::onLoadedData(GJGameLevel* level) {
 
     // depending on whether open level is true or not, we should either open `LevelInfoLayer` or create a `PlayLayer`
     if (open) {
+        // PlayLayer::scene dropped its middle "useReplay" parameter as of GD 2.2091,
+        // same as PlayLayer::init (see bindings/2.2091/GeometryDash.bro).
+#if GEODE_COMP_GD_VERSION >= 22091
+        auto scene = PlayLayer::scene(level, false);
+#else
         auto scene = PlayLayer::scene(level, false, false);
+#endif
         replace ? globed::replaceScene(scene) : globed::pushScene(scene);
     } else {
         auto layer = LevelInfoLayer::create(level, false);

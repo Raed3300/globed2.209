@@ -72,7 +72,12 @@ static void forceWarp(WarpContext context) {
         // globed::replaceScene(PlayLayer::scene(classify.level, false, false));
     } else if (classify.kind == GameLevelKind::Tower) {
         // tower levels, always go straight to playlayer
+        // PlayLayer::scene dropped its middle "useReplay" parameter as of GD 2.2091.
+#if GEODE_COMP_GD_VERSION >= 22091
+        globed::replaceScene(PlayLayer::scene(classify.level, false));
+#else
         globed::replaceScene(PlayLayer::scene(classify.level, false, false));
+#endif
     } else {
         // custom levels, show a loading popup
         auto popup = WarpLoadPopup::create(levelId, openLevel, false);
