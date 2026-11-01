@@ -17,11 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          # TEMPORARY: other platforms disabled while diagnosing 2.2091's "gd"
-          # namespace issue. Restore before merging.
-          # - name: Windows
-          #   os: windows-latest
-          #   build-config: RelWithDebInfo
+          # TEMPORARY: focusing on Windows only per instruction. Restore other
+          # platforms before merging.
+          - name: Windows
+            os: windows-latest
+            build-config: RelWithDebInfo
 
           # - name: macOS
           #   os: macos-latest
@@ -30,9 +30,9 @@ jobs:
           #   os: macos-latest
           #   target: iOS
 
-          - name: Android32
-            os: ubuntu-latest
-            target: Android32
+          # - name: Android32
+          #   os: ubuntu-latest
+          #   target: Android32
 
           # - name: Android64
           #   os: ubuntu-latest
