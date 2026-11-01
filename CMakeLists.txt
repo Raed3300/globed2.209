@@ -28,6 +28,14 @@ set(GEODE_NO_PUGIXML_HEADER ON CACHE BOOL "" FORCE)
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
+# Work around an upstream geode-sdk/bindings bug (see geode-sdk/bindings#1390, unmerged):
+# on iOS, the generated GeneratedSource.cpp references FMOD C types (FMOD_RESULT, etc.)
+# without including an FMOD header. The fix is to force-include the FMOD C++ header,
+# which is already on GeodeBindings' include path (used elsewhere e.g. mapping/Sound.hpp).
+if (("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS" OR IOS) AND TARGET GeodeBindings)
+    target_compile_options(GeodeBindings PRIVATE "-include" "Geode/fmod/fmod.hpp")
+endif()
+
 ## Download net libs (ngtcp2, c-ares, openssl, zstd)
 include(cmake/DownloadNetLibs.cmake)
 
