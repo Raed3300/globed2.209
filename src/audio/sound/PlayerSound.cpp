@@ -1,6 +1,7 @@
 #include <globed/audio/sound/PlayerSound.hpp>
 #include <globed/core/game/RemotePlayer.hpp>
 #include <asp/fs.hpp>
+#include <filesystem>
 
 using namespace geode::prelude;
 
@@ -10,7 +11,7 @@ PlayerSound::PlayerSound(FMOD::Sound* sound, std::weak_ptr<RemotePlayer> player,
     : Sound(sound), m_player(player), m_position(pos) {}
 
 Result<std::shared_ptr<PlayerSound>> PlayerSound::create(
-    const asp::fs::path& path,
+    const std::filesystem::path& path,
     std::shared_ptr<RemotePlayer> player,
     bool paused
 ) {
