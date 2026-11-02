@@ -10,7 +10,7 @@ PlayerSound::PlayerSound(FMOD::Sound* sound, std::weak_ptr<RemotePlayer> player,
     : Sound(sound), m_player(player), m_position(pos) {}
 
 Result<std::shared_ptr<PlayerSound>> PlayerSound::create(
-    const std::filesystem::path& path,
+    const asp::fs::path& path,
     std::shared_ptr<RemotePlayer> player,
     bool paused
 ) {
