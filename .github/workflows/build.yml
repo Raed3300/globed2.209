@@ -23,16 +23,16 @@ jobs:
             os: windows-latest
             build-config: RelWithDebInfo
 
-          # - name: macOS
-          #   os: macos-latest
+          - name: macOS
+            os: macos-latest
 
-          # - name: iOS
-          #   os: macos-latest
-          #   target: iOS
+          - name: iOS
+            os: macos-latest
+            target: iOS
 
-          # - name: Android32
-          #   os: ubuntu-latest
-          #   target: Android32
+          - name: Android32
+            os: ubuntu-latest
+            target: Android32
 
           - name: Android64
             os: ubuntu-latest
