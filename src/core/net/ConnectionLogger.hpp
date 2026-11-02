@@ -18,7 +18,7 @@ public:
     ConnectionLogger();
     ~ConnectionLogger();
 
-    arc::Future<> setup(asp::fs::path path);
+    arc::Future<> setup(std::filesystem::path path);
     void reset();
 
     void sendPacketLog(std::vector<uint8_t> data, bool up);
@@ -28,8 +28,8 @@ private:
     std::optional<arc::TaskHandle<void>> m_handle;
     std::optional<arc::mpsc::Sender<PacketLog>> m_packetLogTx;
     std::optional<arc::mpsc::Sender<std::string>> m_textLogTx;
-    asp::fs::path m_basePath;
-    asp::fs::path m_curPath;
+    std::filesystem::path m_basePath;
+    std::filesystem::path m_curPath;
     asp::time::Instant m_startTime;
     std::string m_curLog;
     arc::Notify m_reset;
